@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Inference Result</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='result_styles.css') }}">
+    <style>
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+        }
+        .marquee {
+            width: max-content;
+            white-space: nowrap;
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+        .container {
+            margin-top: 20px;
+        }
+        canvas {
+            margin-top: 20px;
+        }
+    </style>
+
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='123.gif') }}");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;  /* Keeps image ratio and covers viewport */
+            height: 100vh;  /* Ensures body element fills viewport height */
+            margin: right;  /* Removes any default margin from the body */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-wrapper">
+        <div class="container2">
+            <center>
+                <p><b>User Input:</b>"{{ user_input }}"</p>
+               
+                <h1>Emotion Detected: {{ result[0][0]['label'] if result and result[0] else 'Unknown' }}</h1>
+            </center>
+            <div class="marquee-container">
+                <div class="marquee">
+                    {% for item in result[0] %}
+                        <span>{{ item['label'] }}: {{ item['score']*100 }}% &emsp;</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <center><h1> Result Chart</h1></center>
+            <canvas id="resultChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        var labels = [];
+        var scores = [];
+
+        {% for item in result[0] %}
+            labels.push("{{ item['label'] }}");
+            scores.push("{{ item['score']*100 }}");
+        {% endfor %}
+
+        var ctx = document.getElementById('resultChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Scores',
+                    data: scores,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
